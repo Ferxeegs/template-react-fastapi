@@ -1,6 +1,6 @@
 """
 Background job scheduler (APScheduler).
-Reserved for future maintenance tasks (e.g. purchasing reminders).
+Reserved for future maintenance tasks (e.g. cleanup jobs).
 """
 from __future__ import annotations
 

@@ -193,7 +193,7 @@ export default function ModernAuth() {
                 {isSettingsLoading ? (
                   <span className="block h-10 w-64 bg-white/20 animate-pulse rounded-lg" />
                 ) : (
-                  settings?.general?.site_name || "Purchasing Go"
+                  settings?.general?.site_name || "App Template"
                 )}
               </h2>
               <div
@@ -207,7 +207,7 @@ export default function ModernAuth() {
                     <span className="block h-5 w-4/5 max-w-[224px] bg-white/20 animate-pulse rounded-md" />
                   </>
                 ) : (
-                  settings?.general?.site_tagline || "Silakan masuk dengan kredensial Anda untuk mengakses sistem pengadaan barang."
+                  settings?.general?.site_tagline || "Silakan masuk dengan kredensial Anda untuk mengakses aplikasi."
                 )}
               </div>
               <button
@@ -241,7 +241,7 @@ export default function ModernAuth() {
                     <span className="block h-5 w-4/5 max-w-[224px] bg-white/20 animate-pulse rounded-md" />
                   </>
                 ) : (
-                  settings?.general?.site_tagline || "Daftar untuk mendapatkan akses ke sistem pengadaan barang Purchasing Go."
+                  settings?.general?.site_tagline || "Daftar untuk mendapatkan akses ke aplikasi."
                 )}
               </div>
               <button

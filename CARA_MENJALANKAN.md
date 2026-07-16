@@ -1,6 +1,6 @@
-# Panduan Menjalankan Proyek Purchasing Go
+# Panduan Menjalankan Proyek App Template
 
-Proyek **Purchasing Go** — aplikasi manajemen pengadaan barang — terdiri dari **FastAPI** (Backend) dan **React + Vite** (Frontend) yang terintegrasi dengan **PostgreSQL** dan **Redis**.
+Proyek **App Template** — boilerplate admin React + FastAPI — terdiri dari **FastAPI** (Backend) dan **React + Vite** (Frontend) yang terintegrasi dengan **MySQL/PostgreSQL** dan **Redis**.
 
 ## 🛠️ Langkah Cepat (Docker)
 

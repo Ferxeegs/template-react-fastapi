@@ -10,9 +10,6 @@ def seed_roles(db: Session) -> None:
 
     roles = [
         {"name": "superadmin", "guard_name": "web"},
-        {"name": "purchasing", "guard_name": "web"},
-        {"name": "brand_manager", "guard_name": "web"},
-        {"name": "finance", "guard_name": "web"},
         {"name": "auditor", "guard_name": "web"},
     ]
 

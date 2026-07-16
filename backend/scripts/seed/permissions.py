@@ -48,41 +48,6 @@ def seed_permissions(db: Session) -> None:
         "update_role_scope",
     ]
 
-    purchasing_permissions = [
-        "view_category",
-        "create_category",
-        "update_category",
-        "delete_category",
-        "view_vendor",
-        "create_vendor",
-        "update_vendor",
-        "delete_vendor",
-        "view_product",
-        "create_product",
-        "update_product",
-        "delete_product",
-        "view_uom",
-        "create_uom",
-        "update_uom",
-        "delete_uom",
-        "view_purchase_requisition",
-        "create_purchase_requisition",
-        "update_purchase_requisition",
-        "delete_purchase_requisition",
-        "submit_purchase_requisition",
-        "approve_purchase_requisition",
-        "view_purchase_order",
-        "update_purchase_order",
-        "update_po_item_delivery_status",
-        "update_po_item_payment_status",
-        "update_po_item_price",
-        "update_po_item_qty",
-        "view_po_price_variance_report",
-        "view_stock",
-        "view_stock_movement",
-        "create_stock_movement",
-    ]
-
     all_permissions = (
         user_permissions
         + role_permissions
@@ -90,7 +55,6 @@ def seed_permissions(db: Session) -> None:
         + myprofile_permissions
         + unit_permissions
         + role_scope_permissions
-        + purchasing_permissions
     )
 
     for perm_name in all_permissions:

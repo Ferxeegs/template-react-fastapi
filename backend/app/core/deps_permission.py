@@ -1,4 +1,4 @@
-﻿from typing import List, Union
+from typing import List, Union
 
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session

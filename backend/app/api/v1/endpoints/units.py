@@ -18,18 +18,11 @@ from app.services import scope_service as scope_svc
 
 router = APIRouter()
 
-# Permission untuk dropdown unit (PR, vendor, dll.) — tetap difilter role scope.
+# Permission untuk list/dropdown unit — tetap difilter role scope.
 UNIT_READ_PERMISSIONS = (
     "view_unit",
-    "create_purchase_requisition",
-    "update_purchase_requisition",
-    "create_vendor",
-    "update_vendor",
     "view_role_scope",
     "update_role_scope",
-    "view_stock",
-    "view_stock_movement",
-    "create_stock_movement",
 )
 
 

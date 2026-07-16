@@ -26,14 +26,21 @@ const LazyTurnstile = lazy(() =>
 const TURNSTILE_SCRIPT_ID = "cf-turnstile-script";
 const TURNSTILE_SCRIPT_URL = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
 
-function toTrustedScriptUrl(url: string): string | TrustedScriptURL {
-  const tt = window.trustedTypes;
+function toTrustedScriptUrl(url: string): string {
+  const tt = (window as Window & {
+    trustedTypes?: {
+      createPolicy: (
+        name: string,
+        rules: { createScriptURL: (input: string) => string }
+      ) => { createScriptURL: (input: string) => string };
+    };
+  }).trustedTypes;
   if (!tt) return url;
   try {
     const policy = tt.createPolicy("turnstile-policy", {
-      createScriptURL: (input) => input,
+      createScriptURL: (input: string) => input,
     });
-    return policy.createScriptURL(url);
+    return String(policy.createScriptURL(url));
   } catch {
     return url;
   }

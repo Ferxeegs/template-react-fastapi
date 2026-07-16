@@ -54,7 +54,7 @@ export default function AuthLayout({
           ) : (
             <div className="space-y-4">
               <h2 className="text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-200">
-                {settings?.general?.site_name || "Purchasing Go"}
+                {settings?.general?.site_name || "App Template"}
               </h2>
               <p className="text-lg text-blue-100/90 font-medium leading-relaxed max-w-md mx-auto">
                 {settings?.general?.site_tagline || 

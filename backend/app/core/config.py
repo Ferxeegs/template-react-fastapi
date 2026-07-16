@@ -11,7 +11,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # Project Information
-    PROJECT_NAME: str = "Purchasing Go"
+    PROJECT_NAME: str = "App Template"
     PROJECT_VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
     DEBUG: bool = Field(default=False, description="Debug mode")
@@ -22,7 +22,7 @@ class Settings(BaseSettings):
         description="Database host (nama container di app-bridge, atau localhost dari host)",
     )
     DB_PORT: int = Field(default=3306, description="Database port")
-    DB_NAME: str = Field(default="db_purchasing", description="Database name")
+    DB_NAME: str = Field(default="db_app", description="Database name")
     DB_USER: str = Field(default="root", description="Database user")
     DB_PASSWORD: str = Field(default="", description="Database password")
     DATABASE_URL: str = Field(default="", description="SQLAlchemy database URL (opsional jika DB_* diisi)")
@@ -111,12 +111,12 @@ class Settings(BaseSettings):
     S3_ACCESS_KEY_ID: str = Field(default="", description="S3 access key (e.g. MINIO_ROOT_USER)")
     S3_SECRET_ACCESS_KEY: str = Field(default="", description="S3 secret key")
     S3_BUCKET: str = Field(
-        default="purchasing-go-documents",
+        default="app-documents",
         description="Default private bucket for application uploads",
         validation_alias=AliasChoices("S3_BUCKET", "MINIO_DEFAULT_BUCKET"),
     )
     S3_PUBLIC_BUCKET: str = Field(
-        default="purchasing-go-public-documents",
+        default="app-public-documents",
         description="Bucket for publicly readable assets",
         validation_alias=AliasChoices("S3_PUBLIC_BUCKET", "MINIO_PUBLIC_BUCKET"),
     )

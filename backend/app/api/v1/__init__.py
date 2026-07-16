@@ -11,13 +11,6 @@ from app.api.v1.endpoints import (
     media,
     units,
     role_scopes,
-    categories,
-    uoms,
-    vendors,
-    products,
-    purchase_requisitions,
-    purchase_orders,
-    inventory,
     dashboard,
 )
 from app.core.dependencies import get_current_active_user
@@ -52,48 +45,6 @@ api_router.include_router(
     role_scopes.router,
     prefix="/role-scopes",
     tags=["Role Scopes"],
-    dependencies=_auth_required,
-)
-api_router.include_router(
-    categories.router,
-    prefix="/categories",
-    tags=["Categories"],
-    dependencies=_auth_required,
-)
-api_router.include_router(
-    uoms.router,
-    prefix="/uoms",
-    tags=["Units of Measure"],
-    dependencies=_auth_required,
-)
-api_router.include_router(
-    vendors.router,
-    prefix="/vendors",
-    tags=["Vendors"],
-    dependencies=_auth_required,
-)
-api_router.include_router(
-    products.router,
-    prefix="/products",
-    tags=["Products"],
-    dependencies=_auth_required,
-)
-api_router.include_router(
-    purchase_requisitions.router,
-    prefix="/purchase-requisitions",
-    tags=["Purchase Requisitions"],
-    dependencies=_auth_required,
-)
-api_router.include_router(
-    purchase_orders.router,
-    prefix="/purchase-orders",
-    tags=["Purchase Orders"],
-    dependencies=_auth_required,
-)
-api_router.include_router(
-    inventory.router,
-    prefix="/inventory",
-    tags=["Inventory"],
     dependencies=_auth_required,
 )
 api_router.include_router(

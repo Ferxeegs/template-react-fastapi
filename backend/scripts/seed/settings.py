@@ -14,19 +14,19 @@ def seed_settings(db: Session) -> None:
         {
             "group": "general",
             "name": "site_name",
-            "payload": "Purchasing Go",
+            "payload": "App Template",
             "locked": 0,
         },
         {
             "group": "general",
             "name": "site_tagline",
-            "payload": "Sistem Manajemen Pengadaan Barang Terpadu",
+            "payload": "React + FastAPI Admin Boilerplate",
             "locked": 0,
         },
         {
             "group": "general",
             "name": "site_description",
-            "payload": "Aplikasi manajemen pengadaan barang — dari permintaan hingga penerimaan.",
+            "payload": "Boilerplate aplikasi admin dengan autentikasi, roles, units, dan settings.",
             "locked": 0,
         },
         {

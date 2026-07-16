@@ -12,12 +12,6 @@ from .permissions import seed_permissions
 from .roles import seed_roles
 from .settings import seed_settings
 from .superadmin_user import seed_superadmin_user
-from .vendor_statuses import seed_vendor_statuses
-from .product_types import seed_product_types
-from .uoms import seed_uoms
-from .purchase_types import seed_purchase_types
-from .delivery_statuses import seed_delivery_statuses
-from .payment_statuses import seed_payment_statuses
 from .role_permissions import seed_role_permissions
 
 
@@ -29,12 +23,6 @@ SEED_STEPS: list[tuple[str, SeedFn]] = [
     ("permissions", seed_permissions),
     ("superadmin_user", seed_superadmin_user),
     ("settings", seed_settings),
-    ("vendor_statuses", seed_vendor_statuses),
-    ("product_types", seed_product_types),
-    ("uoms", seed_uoms),
-    ("purchase_types", seed_purchase_types),
-    ("delivery_statuses", seed_delivery_statuses),
-    ("payment_statuses", seed_payment_statuses),
     ("role_permissions", seed_role_permissions),
 ]
 

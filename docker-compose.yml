@@ -1,8 +1,8 @@
 services:
   # --- CORE SERVICES ---
-  # purchasing_go_db:
+  # app_db:
   #   image: postgres:15-alpine  # Menggunakan PostgreSQL 15 (Alpine version lebih ringan)
-  #   container_name: purchasing_go_db
+  #   container_name: app_db
   #   restart: always
   #   ports:
   #     - "5434:5432"  # Expose host 5433 -> container 5432 (default postgres)
@@ -24,10 +24,10 @@ services:
   #   networks:
   #     - app-bridge
 
-  purchasing_go_redis_dev:
+  app_redis_dev:
     profiles: ["dev"]
     image: redis:7-alpine
-    container_name: purchasing_go_redis_dev
+    container_name: app_redis_dev
     restart: always
     environment:
       - TZ=Asia/Jakarta
@@ -39,10 +39,10 @@ services:
     networks:
       - app-bridge
 
-  purchasing_go_redis_prod:
+  app_redis_prod:
     profiles: ["prod"]
     image: redis:7-alpine
-    container_name: purchasing_go_redis_prod
+    container_name: app_redis_prod
     restart: always
     command:
       [
@@ -68,7 +68,7 @@ services:
 
   adminer:
     image: adminer
-    container_name: purchasing_go_adminer
+    container_name: app_adminer
     restart: always
     env_file: .env
     environment:
@@ -82,26 +82,26 @@ services:
     build:
       context: ./backend
       dockerfile: ./builder/local/Dockerfile
-    container_name: purchasing_go_api_dev
+    container_name: app_api_dev
     volumes:
       - ./backend:/app
     env_file: .env  # Menyuntikkan SEMUA variabel .env (SECRET_KEY, dsb) ke dalam FastAPI
     environment:
-      - REDIS_URL=redis://purchasing_go_redis_dev:6379/0
+      - REDIS_URL=redis://app_redis_dev:6379/0
       - ENV=development
       - TZ=Asia/Jakarta
       - S3_ENABLED=${S3_ENABLED:-true}
       - S3_ENDPOINT_URL=${S3_ENDPOINT_URL:-http://minio:9000}
-      - S3_BUCKET=${MINIO_DEFAULT_BUCKET:-purchasing-go-documents}
+      - S3_BUCKET=${MINIO_DEFAULT_BUCKET:-app-documents}
       - S3_ACCESS_KEY_ID=${MINIO_ROOT_USER:-minioadmin}
       - S3_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
       - S3_REGION=${MINIO_SITE_REGION:-us-east-1}
-      - S3_PUBLIC_BUCKET=${MINIO_PUBLIC_BUCKET:-purchasing-go-public-documents}
+      - S3_PUBLIC_BUCKET=${MINIO_PUBLIC_BUCKET:-app-public-documents}
       - S3_PUBLIC_BROWSER_BASE_URL=${S3_PUBLIC_BROWSER_BASE_URL:-http://localhost:9000}
     depends_on:
-      # purchasing_go_db:
+      # app_db:
       #   condition: service_healthy
-      purchasing_go_redis_dev:
+      app_redis_dev:
         condition: service_healthy
     networks:
       - app-bridge
@@ -111,7 +111,7 @@ services:
     build:
       context: ./backend
       dockerfile: ./builder/prod/Dockerfile
-    container_name: purchasing_go_api_prod
+    container_name: app_api_prod
     restart: always
     volumes:
       - backend_media_data:/app/uploads
@@ -122,16 +122,16 @@ services:
       - TZ=Asia/Jakarta
       - S3_ENABLED=${S3_ENABLED:-true}
       - S3_ENDPOINT_URL=${S3_ENDPOINT_URL:-http://minio:9000}
-      - S3_BUCKET=${MINIO_DEFAULT_BUCKET:-purchasing-go-documents}
+      - S3_BUCKET=${MINIO_DEFAULT_BUCKET:-app-documents}
       - S3_ACCESS_KEY_ID=${MINIO_ROOT_USER:-minioadmin}
       - S3_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
       - S3_REGION=${MINIO_SITE_REGION:-us-east-1}
-      - S3_PUBLIC_BUCKET=${MINIO_PUBLIC_BUCKET:-purchasing-go-public-documents}
+      - S3_PUBLIC_BUCKET=${MINIO_PUBLIC_BUCKET:-app-public-documents}
       - S3_PUBLIC_BROWSER_BASE_URL=${S3_PUBLIC_BROWSER_BASE_URL:-http://localhost:9000}
     depends_on:
-      # purchasing_go_db:
+      # app_db:
       #   condition: service_healthy
-      purchasing_go_redis_prod:
+      app_redis_prod:
         condition: service_healthy
     networks:
       - app-bridge
@@ -142,7 +142,7 @@ services:
     build:
       context: ./frontend
       dockerfile: ./builder/local/Dockerfile
-    container_name: purchasing_go_ui_dev
+    container_name: app_ui_dev
     volumes:
       - ./frontend:/app
       - /app/node_modules # Mencegah konflik node_modules lokal & container (anonymous volume)
@@ -178,7 +178,7 @@ services:
       args:
         - VITE_API_URL=${VITE_API_URL}
         - VITE_TURNSTILE_SITE_KEY=${VITE_TURNSTILE_SITE_KEY}
-    container_name: purchasing_go_ui_prod
+    container_name: app_ui_prod
     restart: always
     env_file: .env
     networks:
@@ -190,7 +190,7 @@ services:
     build:
       context: ./nginx
       dockerfile: ./builder/local/Dockerfile
-    container_name: purchasing_go_gateway
+    container_name: app_gateway
     ports:
       - "80:80"
     depends_on:
@@ -206,7 +206,7 @@ services:
   #   build:
   #     context: ./nginx
   #     dockerfile: ./builder/prod/Dockerfile
-  #   container_name: purchasing_go_gateway_prod
+  #   container_name: app_gateway_prod
   #   ports:
   #     - "80:80"
   #     - "443:443"
@@ -219,7 +219,7 @@ services:
 
   minio:
     image: minio/minio:latest
-    container_name: purchasing-go-minio
+    container_name: app-minio
     command: server /data --console-address ":9001"
     ports:
       - "${MINIO_API_PORT:-9000}:9000"
@@ -243,15 +243,15 @@ services:
 
   minio-init:
     image: minio/mc:latest
-    container_name: purchasing-go-minio-init
+    container_name: app-minio-init
     depends_on:
       minio:
         condition: service_healthy
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
-      MINIO_DEFAULT_BUCKET: ${MINIO_DEFAULT_BUCKET:-purchasing-go-documents}
-      MINIO_PUBLIC_BUCKET: ${MINIO_PUBLIC_BUCKET:-purchasing-go-public-documents}
+      MINIO_DEFAULT_BUCKET: ${MINIO_DEFAULT_BUCKET:-app-documents}
+      MINIO_PUBLIC_BUCKET: ${MINIO_PUBLIC_BUCKET:-app-public-documents}
     volumes:
       - ./storage/scripts/init-minio.sh:/init-minio.sh:ro
     entrypoint: ["/bin/sh", "/init-minio.sh"]
@@ -267,4 +267,4 @@ volumes:
   backend_media_data:
   redis_data:
   minio_data:
-    name: purchasing_go_minio_data
+    name: app_minio_data

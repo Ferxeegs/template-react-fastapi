@@ -1,4 +1,3 @@
 """
-Purchasing Go Backend API
+App Template Backend API
 """
-

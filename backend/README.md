@@ -1,6 +1,6 @@
-# Purchasing Go Backend API
+# App Template Backend API
 
-Backend API untuk sistem manajemen pengadaan barang menggunakan FastAPI, SQLAlchemy, dan PostgreSQL.
+Backend API boilerplate menggunakan FastAPI, SQLAlchemy, dan MySQL/PostgreSQL.
 
 ## 🚀 Fitur
 
@@ -68,7 +68,7 @@ docker-compose up -d db
 
 Buat database MySQL (jika belum ada):
 ```sql
-CREATE DATABASE db_purchasing CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE db_app CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
 ### 4. Run Database Migrations

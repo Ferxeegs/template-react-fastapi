@@ -5,7 +5,7 @@ import AppLogo from "../common/AppLogo";
 const ADMIN_WA_NUMBER = import.meta.env.VITE_ADMIN_WHATSAPP || "6281128510072";
 // const ADMIN_WA_DISPLAY = import.meta.env.VITE_ADMIN_WHATSAPP_DISPLAY || "+62 812-3456-7890";
 const DEFAULT_MESSAGE =
-  "Halo Admin, saya ingin melakukan registrasi akun baru di aplikasi Purchasing Go. Mohon panduannya ya. Terima kasih.";
+  "Halo Admin, saya ingin melakukan registrasi akun baru di aplikasi. Mohon panduannya ya. Terima kasih.";
 
 const toWaLink = (phoneNumber: string, message: string) =>
   `https://wa.me/${phoneNumber.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`;

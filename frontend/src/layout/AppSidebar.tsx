@@ -8,26 +8,19 @@ import {
   LockIcon,
   SettingsIcon,
   UserIcon,
-  DocsIcon,
-  BoxIcon,
-  ListIcon,
-  GroupIcon,
-  DollarLineIcon,
-  TableIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import { useAuth } from "../context/AuthContext";
 import AppLogo from "../components/common/AppLogo";
-import { purchaseRequisitionAPI, purchaseOrderAPI, inventoryAPI } from "../utils/api";
 
 type NavItem = {
   name: string;
   icon: React.ReactNode;
   path?: string;
-  subItems?: { 
-    name: string; 
-    path: string; 
-    pro?: boolean; 
+  subItems?: {
+    name: string;
+    path: string;
+    pro?: boolean;
     new?: boolean;
     requiredPermission?: string | string[];
   }[];
@@ -47,70 +40,6 @@ const sidebarGroups: NavGroup[] = [
         icon: <GridIcon />,
         name: "Beranda",
         path: "/",
-      },
-    ],
-  },
-  {
-    title: "Transaksi Pembelian",
-    items: [
-      {
-        icon: <DocsIcon />,
-        name: "Permintaan (PR)",
-        path: "/purchase-requisitions",
-        requiredPermission: ["view_purchase_requisition"],
-      },
-      {
-        icon: <DollarLineIcon />,
-        name: "Purchase Order (PO)",
-        path: "/purchase-orders",
-        requiredPermission: ["view_purchase_order"],
-      },
-      {
-        icon: <ListIcon />,
-        name: "Daftar Item PO",
-        path: "/purchase-orders/items",
-        requiredPermission: ["view_purchase_order"],
-      },
-      {
-        icon: <TableIcon />,
-        name: "Laporan Harga PR vs PO",
-        path: "/purchase-orders/reports/price-variance",
-        requiredPermission: ["view_po_price_variance_report"],
-      },
-      {
-        icon: <TableIcon />,
-        name: "Manajemen Stok",
-        path: "/inventory",
-        requiredPermission: ["view_stock"],
-      },
-    ],
-  },
-  {
-    title: "Data Master",
-    items: [
-      {
-        icon: <BoxIcon />,
-        name: "Produk",
-        path: "/products",
-        requiredPermission: ["view_product"],
-      },
-      {
-        icon: <ListIcon />,
-        name: "Kategori Produk",
-        path: "/categories",
-        requiredPermission: ["view_category"],
-      },
-      {
-        icon: <TableIcon />,
-        name: "Satuan (UOM)",
-        path: "/uoms",
-        requiredPermission: ["view_uom"],
-      },
-      {
-        icon: <GroupIcon />,
-        name: "Vendor",
-        path: "/vendors",
-        requiredPermission: ["view_vendor"],
       },
     ],
   },
@@ -164,80 +93,6 @@ const AppSidebar: React.FC = () => {
   const location = useLocation();
   const { hasPermission } = useAuth();
 
-  const [pendingPrCount, setPendingPrCount] = useState<number>(0);
-  const [pendingPoCount, setPendingPoCount] = useState<number>(0);
-  const [lowStockCount, setLowStockCount] = useState<number>(0);
-
-  const fetchPendingCount = useCallback(async () => {
-    if (hasPermission("approve_purchase_requisition") && hasPermission("view_purchase_requisition")) {
-      try {
-        const res = await purchaseRequisitionAPI.getAll({ pending_approval: true, limit: 1 });
-        if (res.success && res.data?.pagination) {
-          setPendingPrCount(res.data.pagination.total);
-        }
-      } catch (err) {
-        console.error("Failed to fetch pending PR count for sidebar badge", err);
-      }
-    } else {
-      setPendingPrCount(0);
-    }
-  }, [hasPermission]);
-
-  const fetchPendingPoCount = useCallback(async () => {
-    if (hasPermission("view_purchase_order")) {
-      try {
-        const res = await purchaseOrderAPI.getAll({ incomplete_unpaid: true, limit: 1 });
-        if (res.success && res.data?.pagination) {
-          setPendingPoCount(res.data.pagination.total);
-        }
-      } catch (err) {
-        console.error("Failed to fetch pending PO count for sidebar badge", err);
-      }
-    } else {
-      setPendingPoCount(0);
-    }
-  }, [hasPermission]);
-
-  const fetchLowStockCount = useCallback(async () => {
-    if (hasPermission("view_stock")) {
-      try {
-        const res = await inventoryAPI.getStocks({ limit: 1 });
-        if (res.success && res.data) {
-          setLowStockCount(res.data.low_stock_count ?? 0);
-        }
-      } catch (err) {
-        console.error("Failed to fetch low stock count for sidebar badge", err);
-      }
-    } else {
-      setLowStockCount(0);
-    }
-  }, [hasPermission]);
-
-  useEffect(() => {
-    fetchPendingCount();
-    fetchPendingPoCount();
-    fetchLowStockCount();
-  }, [fetchPendingCount, fetchPendingPoCount, fetchLowStockCount, location.pathname]);
-
-  useEffect(() => {
-    const onVisible = () => {
-      if (document.visibilityState === "visible") {
-        fetchPendingCount();
-        fetchPendingPoCount();
-        fetchLowStockCount();
-      }
-    };
-    document.addEventListener("visibilitychange", onVisible);
-    return () => document.removeEventListener("visibilitychange", onVisible);
-  }, [fetchPendingCount, fetchPendingPoCount, fetchLowStockCount]);
-
-  const getBadgeCount = useCallback((name: string): number => {
-    if (name === "Permintaan (PR)") return pendingPrCount;
-    if (name === "Purchase Order (PO)") return pendingPoCount;
-    if (name === "Manajemen Stok") return lowStockCount;
-    return 0;
-  }, [pendingPrCount, pendingPoCount, lowStockCount]);
-
   const [openSubmenu, setOpenSubmenu] = useState<{
     groupIndex: number;
     itemIndex: number;
@@ -247,29 +102,24 @@ const AppSidebar: React.FC = () => {
   );
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // Filter menu items based on permissions
   const filteredNavGroups = useMemo(() => {
     return sidebarGroups.map((group) => {
       const filteredItems = group.items.map((item) => {
-        // Filter subItems based on permissions
         if (item.subItems) {
           const filteredSubItems = item.subItems.filter((subItem) => {
-            if (!subItem.requiredPermission) return true; // No permission required
+            if (!subItem.requiredPermission) return true;
             return hasPermission(subItem.requiredPermission);
           });
-          
-          // If parent item has permission check, check it first
+
           if (item.requiredPermission && !hasPermission(item.requiredPermission)) {
             return null;
           }
-          
-          // Return item with filtered subItems, or null if no subItems remain
-          return filteredSubItems.length > 0 
+
+          return filteredSubItems.length > 0
             ? { ...item, subItems: filteredSubItems }
             : null;
         }
-        
-        // For items without subItems, check parent permission
+
         if (!item.requiredPermission) return item;
         return hasPermission(item.requiredPermission) ? item : null;
       }).filter((item): item is NavItem => item !== null);
@@ -298,7 +148,6 @@ const AppSidebar: React.FC = () => {
             }
           });
         }
-        // Also check if the parent path matches (for items without subItems)
         if (nav.path && isActive(nav.path)) {
           submenuMatched = true;
         }
@@ -391,19 +240,9 @@ const AppSidebar: React.FC = () => {
                   }`}
                 >
                   {nav.icon}
-                  {getBadgeCount(nav.name) > 0 && (!isExpanded && !isHovered && !isMobileOpen) && (
-                    <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5 rounded-full bg-error-500 ring-2 ring-white dark:ring-gray-900" />
-                  )}
                 </span>
                 {(isExpanded || isHovered || isMobileOpen) && (
-                  <>
-                    <span className="menu-item-text">{nav.name}</span>
-                    {getBadgeCount(nav.name) > 0 && (
-                      <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-error-500 px-1.5 text-[10px] font-bold text-white shadow-sm">
-                        {getBadgeCount(nav.name)}
-                      </span>
-                    )}
-                  </>
+                  <span className="menu-item-text">{nav.name}</span>
                 )}
               </Link>
             )

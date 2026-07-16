@@ -1,63 +1,22 @@
-"""Seed: assign permissions to purchasing workflow roles."""
+"""Seed: assign permissions to roles (extend as needed for your domain)."""
 from sqlalchemy.orm import Session
 
 from app.models.auth import Permission, Role
 
 
 ROLE_PERMISSIONS: dict[str, list[str]] = {
-    "purchasing": [
-        "view_unit",
-        "view_category",
-        "create_category",
-        "update_category",
-        "delete_category",
-        "view_vendor",
-        "view_product",
-        "create_product",
-        "update_product",
-        "delete_product",
-        "view_uom",
-        "create_uom",
-        "update_uom",
-        "delete_uom",
-        "view_purchase_requisition",
-        "create_purchase_requisition",
-        "update_purchase_requisition",
-        "delete_purchase_requisition",
-        "submit_purchase_requisition",
-        "view_purchase_order",
-        "update_purchase_order",
-        "update_po_item_delivery_status",
-        "update_po_item_qty",
-        "view_po_price_variance_report",
-        "view_stock",
-        "view_stock_movement",
-        "create_stock_movement",
-    ],
-    "brand_manager": [
-        "view_purchase_requisition",
-        "approve_purchase_requisition",
-        "view_purchase_order",
-        "update_purchase_order",
-        "view_po_price_variance_report",
-        "view_stock",
-        "view_stock_movement",
-    ],
-    "finance": [
-        "view_purchase_requisition",
-        "approve_purchase_requisition",
-        "view_purchase_order",
-        "update_purchase_order",
-        "update_po_item_payment_status",
-        "update_po_item_price",
-        "view_po_price_variance_report",
-    ],
+    # Example:
+    # "auditor": ["view_user", "view_role", "view_unit"],
 }
 
 
 def seed_role_permissions(db: Session) -> None:
-    """Assign domain permissions to purchasing, brand_manager, and finance roles."""
+    """Assign permissions listed in ROLE_PERMISSIONS to matching roles."""
     print("Sedang melakukan seeding role permissions...")
+
+    if not ROLE_PERMISSIONS:
+        print("✓ ROLE_PERMISSIONS kosong — tidak ada assignment tambahan")
+        return
 
     for role_name, perm_names in ROLE_PERMISSIONS.items():
         role = db.query(Role).filter(Role.name == role_name).first()
