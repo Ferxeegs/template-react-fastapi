@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>{{ title }}</title>
+  {% include "_styles.html" %}
+</head>
+<body>
+  <div class="header">
+    <h1 class="title">{{ title }}</h1>
+    <p class="subtitle">{{ subtitle }}</p>
+  </div>
+
+  <table class="meta-table">
+    {% for label, value in meta_rows %}
+    <tr>
+      <td class="label">{{ label }}</td>
+      <td class="value">{{ value }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  {% if rows %}
+  <table class="report">
+    <thead>
+      <tr>
+        <th style="width:4%">No.</th>
+        <th style="width:22%">Nama Produk</th>
+        <th style="width:14%">Kategori</th>
+        <th style="width:14%">Unit Kerja</th>
+        <th style="width:8%">Satuan</th>
+        <th style="width:10%">Stok Awal</th>
+        <th style="width:10%">Masuk (+)</th>
+        <th style="width:10%">Keluar (-)</th>
+        <th style="width:10%">Stok Akhir</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td class="text-center">{{ row.no }}</td>
+        <td class="text-left">{{ row.product_name }}</td>
+        <td class="text-left">{{ row.category_name }}</td>
+        <td class="text-left">{{ row.unit_name }}</td>
+        <td class="text-center">{{ row.uom }}</td>
+        <td class="text-right">{{ row.opening_qty }}</td>
+        <td class="text-right">{{ row.total_in }}</td>
+        <td class="text-right">{{ row.total_out }}</td>
+        <td class="text-right">{{ row.closing_qty }}</td>
+      </tr>
+      {% endfor %}
+      <tr class="total-row">
+        <td colspan="5" class="text-right">JUMLAH</td>
+        <td class="text-right">{{ totals.opening }}</td>
+        <td class="text-right">{{ totals.in }}</td>
+        <td class="text-right">{{ totals.out }}</td>
+        <td class="text-right">{{ totals.closing }}</td>
+      </tr>
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-msg">{{ empty_message }}</div>
+  {% endif %}
+
+  <p class="footer-note">{{ footer_note }}</p>
+</body>
+</html>

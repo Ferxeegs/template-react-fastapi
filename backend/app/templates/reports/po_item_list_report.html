@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>{{ title }}</title>
+  {% include "_styles.html" %}
+  <style>
+    @page { size: A4 landscape; margin: 10mm 8mm; }
+    .grand-total {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      margin-bottom: 12px;
+    }
+    .grand-total td {
+      background: #e5e7eb;
+      font-weight: 700;
+      border: 1px solid #9ca3af;
+      padding: 8px 10px;
+      font-size: 9pt;
+    }
+  </style>
+</head>
+<body class="landscape">
+  <div class="header">
+    <h1 class="title">{{ title }}</h1>
+    <p class="subtitle">{{ subtitle }}</p>
+  </div>
+
+  <table class="meta-table">
+    {% for label, value in meta_rows %}
+    <tr>
+      <td class="label">{{ label }}</td>
+      <td class="value">{{ value }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  {% if rows %}
+  <table class="report">
+    <thead>
+      <tr>
+        <th style="width:3%">No.</th>
+        <th style="width:9%">No. PO</th>
+        <th style="width:9%">No. PR</th>
+        <th style="width:12%">Vendor</th>
+        <th style="width:16%">Nama Item</th>
+        <th style="width:9%">Kategori</th>
+        <th style="width:6%">Qty</th>
+        <th style="width:6%">Satuan</th>
+        <th style="width:8%">Harga</th>
+        <th style="width:8%">Total</th>
+        <th style="width:7%">Kirim</th>
+        <th style="width:7%">Bayar</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td class="text-center">{{ row.no }}</td>
+        <td class="text-left nowrap">{{ row.po_number }}</td>
+        <td class="text-left nowrap">{{ row.pr_number }}</td>
+        <td class="text-left">{{ row.vendor }}</td>
+        <td class="text-left">{{ row.product_name }}</td>
+        <td class="text-left">{{ row.category }}</td>
+        <td class="text-right nowrap">{{ row.qty }}</td>
+        <td class="text-center">{{ row.uom }}</td>
+        <td class="text-right nowrap">{{ row.unit_price }}</td>
+        <td class="text-right nowrap">{{ row.line_total }}</td>
+        <td class="text-center">{{ row.delivery_status }}</td>
+        <td class="text-center">{{ row.payment_status }}</td>
+      </tr>
+      {% endfor %}
+      <tr class="total-row">
+        <td colspan="9" class="text-right">JUMLAH</td>
+        <td class="text-right nowrap">{{ total_amount }}</td>
+        <td colspan="2"></td>
+      </tr>
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-msg">{{ empty_message }}</div>
+  {% endif %}
+
+  <p class="footer-note">{{ footer_note }}</p>
+</body>
+</html>

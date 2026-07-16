@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>{{ title }}</title>
+  {% include "_styles.html" %}
+</head>
+<body class="landscape">
+  <div class="header">
+    <h1 class="title">{{ title }}</h1>
+    <p class="subtitle">{{ subtitle }}</p>
+  </div>
+
+  <table class="meta-table">
+    {% for label, value in meta_rows %}
+    <tr>
+      <td class="label">{{ label }}</td>
+      <td class="value">{{ value }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  {% if rows %}
+  <table class="report">
+    <thead>
+      <tr>
+        <th>No.</th>
+        <th>No. PO</th>
+        <th>No. PR</th>
+        <th>Produk</th>
+        <th>Unit</th>
+        <th>Vendor</th>
+        <th>Qty</th>
+        <th>Harga PR</th>
+        <th>Harga PO</th>
+        <th>Selisih</th>
+        <th>Total PO</th>
+        <th>Selisih Total</th>
+        <th>Bayar</th>
+        <th>Ket.</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td class="text-center">{{ row.no }}</td>
+        <td class="text-left nowrap">{{ row.po_number }}</td>
+        <td class="text-left nowrap">{{ row.pr_number }}</td>
+        <td class="text-left">{{ row.product_name }}</td>
+        <td class="text-left">{{ row.unit_name }}</td>
+        <td class="text-left">{{ row.vendor_name }}</td>
+        <td class="text-center">{{ row.qty }}</td>
+        <td class="text-right nowrap">{{ row.pr_price }}</td>
+        <td class="text-right nowrap">{{ row.po_price }}</td>
+        <td class="text-right nowrap {{ row.variance_class }}">{{ row.variance }}</td>
+        <td class="text-right nowrap">{{ row.total_po }}</td>
+        <td class="text-right nowrap {{ row.variance_class }}">{{ row.total_variance }}</td>
+        <td class="text-center">{{ row.payment_status }}</td>
+        <td class="text-left">{{ row.notes }}</td>
+      </tr>
+      {% endfor %}
+      <tr class="total-row">
+        <td colspan="10" class="text-right">JUMLAH</td>
+        <td class="text-right nowrap">{{ total_po }}</td>
+        <td class="text-right nowrap">{{ total_variance }}</td>
+        <td colspan="2"></td>
+      </tr>
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-msg">{{ empty_message }}</div>
+  {% endif %}
+
+  <p class="footer-note">{{ footer_note }}</p>
+</body>
+</html>

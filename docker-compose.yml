@@ -1,0 +1,270 @@
+services:
+  # --- CORE SERVICES ---
+  # purchasing_go_db:
+  #   image: postgres:15-alpine  # Menggunakan PostgreSQL 15 (Alpine version lebih ringan)
+  #   container_name: purchasing_go_db
+  #   restart: always
+  #   ports:
+  #     - "5434:5432"  # Expose host 5433 -> container 5432 (default postgres)
+  #   env_file: .env
+  #   environment:
+  #     - TZ=Asia/Jakarta
+  #     # PostgreSQL menggunakan variabel berikut:
+  #     - POSTGRES_USER=${DB_USER}
+  #     - POSTGRES_PASSWORD=${DB_PASSWORD}
+  #     - POSTGRES_DB=${DB_NAME}
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data  # Path data PostgreSQL berbeda dengan MySQL
+  #   healthcheck:
+  #     # Menggunakan pg_isready untuk memastikan database siap menerima koneksi
+  #     test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   networks:
+  #     - app-bridge
+
+  purchasing_go_redis_dev:
+    profiles: ["dev"]
+    image: redis:7-alpine
+    container_name: purchasing_go_redis_dev
+    restart: always
+    environment:
+      - TZ=Asia/Jakarta
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-bridge
+
+  purchasing_go_redis_prod:
+    profiles: ["prod"]
+    image: redis:7-alpine
+    container_name: purchasing_go_redis_prod
+    restart: always
+    command:
+      [
+        "redis-server",
+        "/usr/local/etc/redis/redis.conf",
+        "--requirepass",
+        "${REDIS_PASSWORD}"
+      ]
+    environment:
+      - TZ=Asia/Jakarta
+      # Wajib diexpose ke container agar healthcheck bisa auth pakai REDIS_PASSWORD
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    volumes:
+      - ./redis/redis.prod.conf:/usr/local/etc/redis/redis.conf:ro
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a $${REDIS_PASSWORD} ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-bridge
+
+  adminer:
+    image: adminer
+    container_name: purchasing_go_adminer
+    restart: always
+    env_file: .env
+    environment:
+      ADMINER_DEFAULT_SERVER: ${DB_HOST:-mysql-container}
+    networks:
+      - app-bridge
+
+  # --- BACKEND SERVICES ---
+  backend-dev:
+    profiles: ["dev"]
+    build:
+      context: ./backend
+      dockerfile: ./builder/local/Dockerfile
+    container_name: purchasing_go_api_dev
+    volumes:
+      - ./backend:/app
+    env_file: .env  # Menyuntikkan SEMUA variabel .env (SECRET_KEY, dsb) ke dalam FastAPI
+    environment:
+      - REDIS_URL=redis://purchasing_go_redis_dev:6379/0
+      - ENV=development
+      - TZ=Asia/Jakarta
+      - S3_ENABLED=${S3_ENABLED:-true}
+      - S3_ENDPOINT_URL=${S3_ENDPOINT_URL:-http://minio:9000}
+      - S3_BUCKET=${MINIO_DEFAULT_BUCKET:-purchasing-go-documents}
+      - S3_ACCESS_KEY_ID=${MINIO_ROOT_USER:-minioadmin}
+      - S3_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
+      - S3_REGION=${MINIO_SITE_REGION:-us-east-1}
+      - S3_PUBLIC_BUCKET=${MINIO_PUBLIC_BUCKET:-purchasing-go-public-documents}
+      - S3_PUBLIC_BROWSER_BASE_URL=${S3_PUBLIC_BROWSER_BASE_URL:-http://localhost:9000}
+    depends_on:
+      # purchasing_go_db:
+      #   condition: service_healthy
+      purchasing_go_redis_dev:
+        condition: service_healthy
+    networks:
+      - app-bridge
+
+  backend-prod:
+    profiles: ["prod"]
+    build:
+      context: ./backend
+      dockerfile: ./builder/prod/Dockerfile
+    container_name: purchasing_go_api_prod
+    restart: always
+    volumes:
+      - backend_media_data:/app/uploads
+    env_file: .env
+    environment:
+      - REDIS_URL=${REDIS_URL}
+      - ENV=production
+      - TZ=Asia/Jakarta
+      - S3_ENABLED=${S3_ENABLED:-true}
+      - S3_ENDPOINT_URL=${S3_ENDPOINT_URL:-http://minio:9000}
+      - S3_BUCKET=${MINIO_DEFAULT_BUCKET:-purchasing-go-documents}
+      - S3_ACCESS_KEY_ID=${MINIO_ROOT_USER:-minioadmin}
+      - S3_SECRET_ACCESS_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
+      - S3_REGION=${MINIO_SITE_REGION:-us-east-1}
+      - S3_PUBLIC_BUCKET=${MINIO_PUBLIC_BUCKET:-purchasing-go-public-documents}
+      - S3_PUBLIC_BROWSER_BASE_URL=${S3_PUBLIC_BROWSER_BASE_URL:-http://localhost:9000}
+    depends_on:
+      # purchasing_go_db:
+      #   condition: service_healthy
+      purchasing_go_redis_prod:
+        condition: service_healthy
+    networks:
+      - app-bridge
+
+  # --- FRONTEND SERVICES ---
+  frontend-dev:
+    profiles: ["dev"]
+    build:
+      context: ./frontend
+      dockerfile: ./builder/local/Dockerfile
+    container_name: purchasing_go_ui_dev
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # Mencegah konflik node_modules lokal & container (anonymous volume)
+      - /app/.vite # Cache Vite untuk performa lebih baik
+    ports:
+      - "5300:5173" # Expose port langsung untuk akses langsung ke Vite dev server
+    environment:
+      # PENTING: Memaksa Vite/Chokidar mendeteksi perubahan file di Docker
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - NODE_ENV=development
+      - VITE_HMR_PORT=5173
+      # Optimasi Node.js untuk performa
+      - NODE_OPTIONS=--max-old-space-size=4096
+    env_file: .env
+    # Healthcheck untuk memastikan container siap
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:5173"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    networks:
+      - app-bridge
+    # Restart policy untuk development
+    restart: unless-stopped
+
+  frontend-prod:
+    profiles: ["prod"]
+    build:
+      context: ./frontend
+      dockerfile: ./builder/prod/Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL}
+        - VITE_TURNSTILE_SITE_KEY=${VITE_TURNSTILE_SITE_KEY}
+    container_name: purchasing_go_ui_prod
+    restart: always
+    env_file: .env
+    networks:
+      - app-bridge
+
+  # --- NGINX GATEWAY ---
+  nginx-dev:
+    profiles: ["dev"]
+    build:
+      context: ./nginx
+      dockerfile: ./builder/local/Dockerfile
+    container_name: purchasing_go_gateway
+    ports:
+      - "80:80"
+    depends_on:
+      frontend-dev:
+        condition: service_healthy
+      backend-dev:
+        condition: service_started
+    networks:
+      - app-bridge
+
+  # nginx-prod:
+  #   profiles: ["prod"]
+  #   build:
+  #     context: ./nginx
+  #     dockerfile: ./builder/prod/Dockerfile
+  #   container_name: purchasing_go_gateway_prod
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   restart: always
+  #   depends_on:
+  #     - frontend-prod
+  #     - backend-prod
+  #   networks:
+  #     - app-bridge
+
+  minio:
+    image: minio/minio:latest
+    container_name: purchasing-go-minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      # S3-compatible site region (not a real AWS AZ; SDKs still require a region string).
+      MINIO_SITE_REGION: ${MINIO_SITE_REGION:-us-east-1}
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - app-bridge
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: purchasing-go-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      MINIO_DEFAULT_BUCKET: ${MINIO_DEFAULT_BUCKET:-purchasing-go-documents}
+      MINIO_PUBLIC_BUCKET: ${MINIO_PUBLIC_BUCKET:-purchasing-go-public-documents}
+    volumes:
+      - ./storage/scripts/init-minio.sh:/init-minio.sh:ro
+    entrypoint: ["/bin/sh", "/init-minio.sh"]
+    networks:
+      - app-bridge
+
+networks:
+  app-bridge:
+    external: true
+
+volumes:
+  postgres_data:
+  backend_media_data:
+  redis_data:
+  minio_data:
+    name: purchasing_go_minio_data

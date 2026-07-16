@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/favicon.png" />
+
+    <meta name="theme-color" content="#3B82F6" />
+    <meta name="description" content="Purchasing Go — Sistem Manajemen Pengadaan Barang." />
+
+    <title>Purchasing Go</title>
+    <style>
+      #auth-boot-splash {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 999999;
+        align-items: center;
+        justify-content: center;
+        background: #f9fafb;
+      }
+      html.dark #auth-boot-splash {
+        background: #111827;
+      }
+      html.auth-transition-active #auth-boot-splash {
+        display: flex;
+      }
+      #auth-boot-splash .spinner {
+        width: 44px;
+        height: 44px;
+        border: 4px solid #dbeafe;
+        border-top-color: #3b82f6;
+        border-radius: 50%;
+        animation: auth-spin 0.8s linear infinite;
+      }
+      @keyframes auth-spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
+    <script>
+      try {
+        if (sessionStorage.getItem("auth_session_transition") === "1") {
+          document.documentElement.classList.add("auth-transition-active");
+        }
+      } catch (e) {}
+    </script>
+  </head>
+  <body class="dark:bg-gray-900">
+    <div id="auth-boot-splash" aria-hidden="true"><div class="spinner"></div></div>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,15 @@
+# Version Control
+.git/
+.gitignore
+
+# Database Data (PENTING: Jangan masukkan data DB ke image!)
+postgres_data/
+
+# Documentation
+README.md
+docs/
+
+# Temp files
+*.log
+.tmp/
+.cache/
